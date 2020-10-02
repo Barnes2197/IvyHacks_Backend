@@ -1,9 +1,10 @@
-import flask
-from flask.globals import request
+from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import csv
+
+from flask.signals import Namespace
 
 # cred = credentials.Certificate("tuitionapisecrets.json")
 # firebase_admin.initialize_app(cred)
@@ -11,11 +12,16 @@ import csv
 # db = firestore.client()
 # doc_ref = db.collection(u'tuition_cost')
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
 app.config["DEBUG"] = False
 
 @app.route('/', methods=['GET'])
 def home():
+    response = {}
+    response['message'] = 'Hello'
+    return jsonify(response)
+@app.route('/names', methods=['GET'])
+def names():
     # def school_has_name(school):
     #     try:
     #         name = school.get('name')
@@ -32,4 +38,6 @@ def home():
             college_names.append(row['name'])
     print(list(college_names))
     return ','.join(college_names)
-app.run()
+
+if __name__ == '__main__':
+    app.run(threaded=True, port=5000)
