@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import csv
+from flask import json
 
 from flask.signals import Namespace
 
@@ -37,7 +38,7 @@ def names():
         for row in reader:
             college_names.append(row['name'])
     print(list(college_names))
-    return ','.join(college_names)
+    return jsonify(college_names)
 
 if __name__ == '__main__':
     app.run(threaded=True, port=5000)
