@@ -21,21 +21,23 @@ def load_data():
     #Tries to get entries from Firebase first and fallsback to csv if firebase errors out
 
     try:
+        #Loads db credentials and tries to establish a connection
         load_dotenv(verbose=True)
         cred = credentials.Certificate(os.getenv("SERVICE_ACCOUNT_JSON"))
         firebase_admin.initialize_app(cred)
-
         db = firestore.client()
-        doc_ref = db.collection(u'tuition_cost')
-        docs = doc_ref.stream()
+        docs = db.collection(u'tuition_cost').stream()
+
         for doc in docs:
             school = doc.to_dict()
             if school:
                 schools[school['name']] = school
+
         print('Using Firebase to retrieve Entries')
         
     except:
-        print(f'Exception occured using firebase:{ traceback.print_exception }, Using CSV instead')
+        print(f'Exception occured using firebase:{ traceback.print_exception() }, Using CSV instead')
+
         with open('tuition_cost.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
