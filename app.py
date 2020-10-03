@@ -4,26 +4,39 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import csv
 from flask import json
+import sys
+import os
+from dotenv import load_dotenv
 
-from flask.signals import Namespace
 
-# cred = credentials.Certificate("tuitionapisecrets.json")
-# firebase_admin.initialize_app(cred)
-
-# db = firestore.client()
-# doc_ref = db.collection(u'tuition_cost')
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
 schools = {}
 @app.before_first_request
-def load_csv():
-    with open('tuition_cost.csv', newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if '/' in row['name']:
-                row['name'] = row['name'].replace('/', ' ')
-            schools[row['name']] = row
+def load_data():
+    try:
+        load_dotenv(verbose=True)
+        cred = credentials.Certificate(os.getenv("SERVICE_ACCOUNT_JSON"))
+        firebase_admin.initialize_app(cred)
+
+        db = firestore.client()
+        doc_ref = db.collection(u'tuition_cost')
+        docs = doc_ref.stream()
+        for doc in docs:
+            school = doc.to_dict()
+            if school:
+                schools[school['name']] = school
+        print('Using Firebase to retrieve Entries')
+        
+    except:
+        print(f'Exception occured using firebase:{ sys.exc_info()[0] }, Using CSV instead')
+        with open('tuition_cost.csv', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if '/' in row['name']:
+                    row['name'] = row['name'].replace('/', ' ')
+                schools[row['name']] = row
 
 
 @app.route('/', methods=['GET'])
@@ -34,17 +47,6 @@ def home():
 
 @app.route('/names', methods=['GET'])
 def names():
-
-    # def school_has_name(school):
-    #     try:
-    #         name = school.get('name')
-    #         return name
-    #     except:
-    #         print('school has no name')
-    #         return ''
-    #snapshots = doc_ref.get()
-    #document.get('name') to retrieve all names
-
     college_names = []
     for school in schools.items():
             college_names.append(school[0])
