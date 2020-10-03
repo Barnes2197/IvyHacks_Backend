@@ -3,8 +3,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import csv
-from flask import json
-import sys
+import traceback
 import os
 from dotenv import load_dotenv
 
@@ -12,9 +11,15 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
+
 schools = {}
+
+#Loads schools in-memory so that calls to apis don't hit the database more than needed
 @app.before_first_request
 def load_data():
+
+    #Tries to get entries from Firebase first and fallsback to csv if firebase errors out
+
     try:
         load_dotenv(verbose=True)
         cred = credentials.Certificate(os.getenv("SERVICE_ACCOUNT_JSON"))
@@ -30,7 +35,7 @@ def load_data():
         print('Using Firebase to retrieve Entries')
         
     except:
-        print(f'Exception occured using firebase:{ sys.exc_info()[0] }, Using CSV instead')
+        print(f'Exception occured using firebase:{ traceback.print_exception }, Using CSV instead')
         with open('tuition_cost.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
