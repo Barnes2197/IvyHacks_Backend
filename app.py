@@ -51,12 +51,11 @@ def names():
         
     return jsonify(college_names)
 
-@app.route('/tuition/', methods=['GET'])
+@app.route('/tuition', methods=['GET'])
 def tuition():
     school_name = request.args['name']
     print(request.args['name'])
     tuition_cost = {}
-    print(schools[school_name])
     try:
         tuition_cost['in_state_tuition'] = schools[school_name]['in_state_tuition']
         tuition_cost['out_of_state_tuition'] = schools[school_name]['out_of_state_tuition']
