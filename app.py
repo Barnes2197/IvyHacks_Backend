@@ -22,7 +22,7 @@ def load_csv():
         reader = csv.DictReader(csvfile)
         for row in reader:
             if '/' in row['name']:
-                row['name'].replace('/', ' ')
+                row['name'] = row['name'].replace('/', ' ')
             schools[row['name']] = row
 
 
@@ -62,7 +62,6 @@ def tuition():
         return jsonify(tuition_cost)
     except:
         return 'School name not in database'
-
 
 
 if __name__ == '__main__':
